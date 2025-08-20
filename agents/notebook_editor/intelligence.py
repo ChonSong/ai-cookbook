@@ -11,7 +11,7 @@ import json
 from openai import OpenAI
 from pydantic import BaseModel, Field
 
-from notebook_utils import NotebookChunk, EditRequest, EditOperation
+from .notebook_utils import NotebookChunk, EditRequest, EditOperation
 
 
 class NotebookAnalysis(BaseModel):

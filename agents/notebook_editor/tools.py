@@ -13,7 +13,7 @@ import shutil
 from datetime import datetime
 import hashlib
 
-from notebook_utils import EditRequest, EditOperation, NotebookChunk
+from .notebook_utils import EditRequest, EditOperation, NotebookChunk
 
 
 class NotebookTools:
