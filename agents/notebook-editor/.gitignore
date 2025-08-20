@@ -1,0 +1,18 @@
+# Ignore memory storage files
+demo_memory/
+notebook_memory/
+
+# Ignore backup files
+notebook_backups/
+*.backup.ipynb
+
+# Ignore temporary notebook files
+test_notebook.ipynb
+large_sample_notebook.ipynb
+large_sample_notebook.modified.ipynb
+*.tmp
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
