@@ -11,7 +11,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 
-from notebook_utils import EditRequest, NotebookChunk
+from .notebook_utils import EditRequest, NotebookChunk
 
 
 @dataclass

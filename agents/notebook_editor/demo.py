@@ -14,11 +14,11 @@ import nbformat
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
-from notebook_utils import (
+from .notebook_utils import (
     NotebookChunker, NotebookValidator, EditRequest, EditOperation
 )
-from memory import NotebookMemory
-from tools import NotebookTools
+from .memory import NotebookMemory
+from .tools import NotebookTools
 
 
 def create_large_sample_notebook():

@@ -10,10 +10,10 @@ import os
 from pathlib import Path
 from openai import OpenAI
 
-from notebook_utils import NotebookChunker, NotebookValidator, EditRequest, EditOperation
-from intelligence import NotebookIntelligence
-from memory import NotebookMemory
-from tools import NotebookTools
+from .notebook_utils import NotebookChunker, NotebookValidator, EditRequest, EditOperation
+from .intelligence import NotebookIntelligence
+from .memory import NotebookMemory
+from .tools import NotebookTools
 
 
 class NotebookEditorAgent:

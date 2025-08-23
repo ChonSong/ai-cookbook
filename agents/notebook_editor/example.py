@@ -13,7 +13,7 @@ from pathlib import Path
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
-from notebook_editor import NotebookEditorAgent, EditOperation, EditRequest
+from . import NotebookEditorAgent, EditOperation, EditRequest
 
 
 def create_sample_large_notebook():
