@@ -18,7 +18,7 @@ class NotebookAnalysis(BaseModel):
     """Structured output for notebook analysis."""
     summary: str = Field(description="Brief summary of the notebook content")
     main_topics: List[str] = Field(description="Main topics covered in the notebook")
-    cell_types_distribution: Dict[str, int] = Field(description="Distribution of cell types")
+    cell_types_distribution: Optional[Dict[str, int]] = Field(description="Distribution of cell types")
     complexity_level: str = Field(description="Overall complexity level: low, medium, high")
     suggestions: List[str] = Field(description="Suggestions for improvement")
     potential_issues: List[str] = Field(description="Potential issues or problems identified")
@@ -30,7 +30,7 @@ class EditSuggestion(BaseModel):
     target_index: Optional[int] = Field(description="Index of target cell (if applicable)")
     reasoning: str = Field(description="Explanation for why this edit is suggested")
     content: Optional[str] = Field(description="New content for the cell (if applicable)")
-    cell_type: Optional[str] = Field(description="Type of cell (code, markdown, raw)")
+    cell_type: Optional[str] = Field(description="Type of cell (code, markdown, raw)", default=None)
     priority: str = Field(description="Priority level: low, medium, high")
 
 
@@ -64,6 +64,14 @@ class NotebookIntelligence:
         Jupyter notebook chunk and provide insights about its content, structure, 
         and potential improvements.
         
+        You must provide a value for all fields in the NotebookAnalysis model, including:
+        - summary
+        - main_topics
+        - cell_types_distribution
+        - complexity_level
+        - suggestions
+        - potential_issues
+
         Focus on:
         - Understanding the main purpose and topics
         - Identifying the types of cells and their distribution
@@ -77,13 +85,14 @@ class NotebookIntelligence:
             {"role": "user", "content": f"Analyze this notebook chunk:\n\n{chunk_content}"}
         ]
         
-        response = self.client.beta.chat.completions.parse(
+        # Refactored to use the instructor library for structured output
+        response = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
-            response_format=NotebookAnalysis,
+            response_model=NotebookAnalysis,
         )
         
-        return response.choices[0].message.parsed
+        return response
     
     def suggest_edits(self, chunk: NotebookChunk, user_request: str) -> List[EditSuggestion]:
         """
@@ -103,6 +112,14 @@ class NotebookIntelligence:
         suggest specific edits to improve the notebook. Each suggestion should
         include the operation type, target location, reasoning, and content.
         
+        You must provide a value for all fields in the EditSuggestion model, including:
+        - operation
+        - target_index
+        - reasoning
+        - content
+        - cell_type
+        - priority
+
         Available operations:
         - modify_cell: Change existing cell content
         - insert_cell: Add new cell at specific position
@@ -127,59 +144,13 @@ class NotebookIntelligence:
             """}
         ]
         
-        # Use function calling to get structured suggestions
-        tools = [{
-            "type": "function",
-            "function": {
-                "name": "suggest_edit",
-                "description": "Suggest a specific edit to the notebook",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "operation": {
-                            "type": "string",
-                            "enum": ["modify_cell", "insert_cell", "delete_cell", "add_markdown", "move_cell", "split_cell", "merge_cells"]
-                        },
-                        "target_index": {
-                            "type": "integer",
-                            "description": "Index of target cell (0-based, relative to chunk)"
-                        },
-                        "reasoning": {
-                            "type": "string",
-                            "description": "Explanation for this edit"
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "New content for the cell"
-                        },
-                        "cell_type": {
-                            "type": "string",
-                            "enum": ["code", "markdown", "raw"]
-                        },
-                        "priority": {
-                            "type": "string",
-                            "enum": ["low", "medium", "high"]
-                        }
-                    },
-                    "required": ["operation", "reasoning", "priority"]
-                }
-            }
-        }]
-        
         response = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
-            tools=tools,
-            tool_choice="auto"
+            response_model=List[EditSuggestion],
         )
         
-        suggestions = []
-        if response.choices[0].message.tool_calls:
-            for tool_call in response.choices[0].message.tool_calls:
-                if tool_call.function.name == "suggest_edit":
-                    args = json.loads(tool_call.function.arguments)
-                    suggestion = EditSuggestion(**args)
-                    suggestions.append(suggestion)
+        suggestions = response
         
         return suggestions
     

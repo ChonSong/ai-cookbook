@@ -136,15 +136,19 @@ def main():
         print("\n🔍 Analyzing notebook...")
         analysis_result = agent.analyze_notebook(detailed=True)
         
-        if analysis_result["success"]:
-            overview = analysis_result["overview"]
-            print(f"   Processing strategy: {overview['processing_strategy']}")
-            print(f"   Complexity: {overview['memory_estimate']['processing_complexity']}")
+        if not analysis_result["success"]:
+            print(f"❌ Analysis failed: {analysis_result['error']}")
+            agent.end_session()
+            return
             
-            if analysis_result["recommendations"]:
-                print("   Recommendations:")
-                for rec in analysis_result["recommendations"]:
-                    print(f"   • {rec}")
+        overview = analysis_result["overview"]
+        print(f"   Processing strategy: {overview['processing_strategy']}")
+        print(f"   Complexity: {overview['memory_estimate']['processing_complexity']}")
+
+        if analysis_result["recommendations"]:
+            print("   Recommendations:")
+            for rec in analysis_result["recommendations"]:
+                print(f"   • {rec}")
         
         # Generate edit suggestions
         print("\n✏️  Generating edit suggestions...")
@@ -153,16 +157,20 @@ def main():
             auto_apply=True  # Automatically apply high-priority suggestions
         )
         
-        if edit_result["success"]:
-            print(f"   Generated {len(edit_result['suggestions'])} suggestions")
-            print(f"   Applied {len(edit_result['applied_edits'])} edits automatically")
-            
-            # Show applied edits
-            for edit in edit_result["applied_edits"]:
-                if edit["result"]["success"]:
-                    operation = edit["suggestion"]["operation"]
-                    reasoning = edit["suggestion"]["reasoning"]
-                    print(f"   ✅ {operation}: {reasoning[:80]}...")
+        if not edit_result["success"]:
+            print(f"❌ Edit generation failed: {edit_result['error']}")
+            agent.end_session()
+            return
+
+        print(f"   Generated {len(edit_result['suggestions'])} suggestions")
+        print(f"   Applied {len(edit_result['applied_edits'])} edits automatically")
+
+        # Show applied edits
+        for edit in edit_result["applied_edits"]:
+            if edit["result"]["success"]:
+                operation = edit["suggestion"]["operation"]
+                reasoning = edit["suggestion"]["reasoning"]
+                print(f"   ✅ {operation}: {reasoning[:80]}...")
         
         # Save the edited notebook
         print("\n💾 Saving edited notebook...")

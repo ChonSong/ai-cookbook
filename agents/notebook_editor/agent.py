@@ -8,6 +8,7 @@ AI agent for editing extremely large Jupyter notebooks.
 from typing import List, Dict, Any, Optional
 import os
 from pathlib import Path
+import instructor
 from openai import OpenAI
 
 from .notebook_utils import NotebookChunker, NotebookValidator, EditRequest, EditOperation
@@ -52,6 +53,7 @@ class NotebookEditorAgent:
             raise ValueError("OpenAI API key is required. Set OPENAI_API_KEY environment variable or pass it directly.")
         
         self.client = OpenAI(api_key=api_key)
+        instructor.patch(self.client)
         self.model = model
         
         # Initialize building blocks
@@ -186,6 +188,9 @@ class NotebookEditorAgent:
             return results
             
         except Exception as e:
+            # Check for authentication errors specifically
+            if "authentication" in str(e).lower():
+                print(f"Authentication error: Please check your OPENAI_API_KEY.")
             return {
                 "success": False,
                 "error": f"Analysis failed: {str(e)}"
@@ -250,6 +255,8 @@ class NotebookEditorAgent:
             return results
             
         except Exception as e:
+            if "authentication" in str(e).lower():
+                print(f"Authentication error: Please check your OPENAI_API_KEY.")
             return {
                 "success": False,
                 "error": f"Edit generation failed: {str(e)}"
