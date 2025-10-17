@@ -49,7 +49,7 @@ You should see your device listed.
 ### Step 2: Capture a Screenshot
 
 ```bash
-python 01_screen_capture.py
+python screen_capture.py
 ```
 
 ✅ **Expected output**: Screenshot saved to `./output/screenshot_*.png`
@@ -57,7 +57,7 @@ python 01_screen_capture.py
 ### Step 3: Test Card Detection
 
 ```bash
-python 02_card_detection.py \
+python card_detection.py \
   --input ./output/screenshot_*.png \
   --method template \
   --visualize
@@ -68,7 +68,7 @@ python 02_card_detection.py \
 ### Step 4: Test OCR Recognition
 
 ```bash
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image ./output/screenshot_*.png \
   --visualize
 ```
@@ -78,17 +78,39 @@ python 03_ocr_card_recognition.py \
 ### Step 5: Test Poker Logic
 
 ```bash
-python 04_poker_logic.py \
+python poker_logic.py \
   --hand "A♠ K♠" \
   --board "Q♠ J♠ 10♠"
 ```
 
 ✅ **Expected output**: Hand evaluation (Royal Flush)
 
-### Step 6: Test Full Automation (Dry Run)
+### Step 6: Calibrate Button Positions
+
+Before running automation, calibrate button positions for your poker app:
 
 ```bash
-python 05_full_automation.py \
+# 1. Capture a screenshot with all buttons visible
+python screen_capture.py
+
+# 2. Run calibration tool
+python calibration.py --screenshot output/screenshot_*.png
+
+# 3. Click the center of each button when prompted
+# - fold
+# - call/check
+# - raise/bet
+# - all_in (if visible)
+
+# This creates button_config.json
+```
+
+✅ **Expected output**: `button_config.json` created with button positions
+
+### Step 7: Test Full Automation (Dry Run)
+
+```bash
+python automation.py \
   --dry-run \
   --debug \
   --single-hand
@@ -97,6 +119,30 @@ python 05_full_automation.py \
 ✅ **Expected output**: Complete analysis without executing actions
 
 ## Common Issues
+
+### ❌ "Button config not found"
+
+**Solution**: Run the calibration tool first
+
+```bash
+# Capture screenshot with all buttons visible
+python screen_capture.py
+
+# Run calibration
+python calibration.py --screenshot output/screenshot_*.png
+```
+
+### ❌ "Cards in wrong regions"
+
+**Solution**: Visualize and adjust region definitions
+
+```bash
+# Visualize default regions
+python card_region_classifier.py --screenshot screenshot.png --output regions.png
+
+# Check the visualization and adjust if needed
+# Edit region_config.json if regions don't match your app layout
+```
 
 ### ❌ "ADB not found"
 
@@ -149,6 +195,27 @@ tesseract --version
 
 ## Next Steps
 
+### Configuration Options
+
+Create a configuration file for persistent settings:
+
+```bash
+# Generate example config
+python config.py --create-example
+
+# Edit example_config.yaml with your preferences
+nano example_config.yaml
+
+# Use with automation
+python automation.py --config example_config.yaml --dry-run
+```
+
+Example configuration adjustments:
+- **Detection method**: Switch between YOLO and template matching
+- **Strategy style**: Choose aggressive, balanced, or conservative play
+- **Logging level**: Set DEBUG for detailed logs, INFO for normal operation
+- **Screen resolution**: Match your emulator's resolution
+
 ### For Template Matching
 
 1. Capture screenshots of individual cards from your poker app
@@ -160,8 +227,8 @@ tesseract --version
 
 1. Collect 200-500 screenshots from your poker app
 2. Annotate cards using [LabelImg](https://github.com/heartexlabs/labelImg)
-3. Train model: `python 06_train_detector.py --data ./dataset --epochs 100`
-4. Use trained model: `python 02_card_detection.py --method yolo --model ./runs/train/exp/weights/best.pt`
+3. Train model: `python train_detector.py --data ./dataset --epochs 100`
+4. Use trained model: `python card_detection.py --method yolo --model ./runs/train/exp/weights/best.pt`
 
 ## Safety Reminder
 
@@ -202,11 +269,11 @@ pip install opencv-python pytesseract numpy
 adb connect 127.0.0.1:5555
 
 # 3. Capture and view
-python 01_screen_capture.py
+python screen_capture.py
 # Check ./output/ for screenshot
 
 # 4. Test poker logic (no dependencies on actual game)
-python 04_poker_logic.py --hand "A♠ A♥" --board "A♦ K♠ Q♠"
+python poker_logic.py --hand "A♠ A♥" --board "A♦ K♠ Q♠"
 ```
 
 ## Support

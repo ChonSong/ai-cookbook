@@ -10,10 +10,10 @@ Requirements:
 
 Usage:
     # Evaluate hand strength
-    python 04_poker_logic.py --hand "A♠ K♠" --board "Q♠ J♠ 10♠"
+    python poker_logic.py --hand "A♠ K♠" --board "Q♠ J♠ 10♠"
 
     # Get recommended action
-    python 04_poker_logic.py --hand "7♥ 2♦" --board "K♠ Q♠ J♣" --pot 100 --bet 50
+    python poker_logic.py --hand "7♥ 2♦" --board "K♠ Q♠ J♣" --pot 100 --bet 50
 """
 
 import argparse

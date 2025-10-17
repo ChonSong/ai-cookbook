@@ -11,13 +11,13 @@ Requirements:
 
 Usage:
     # Train with default settings
-    python 06_train_detector.py --data ./dataset
+    python train_detector.py --data ./dataset
 
     # Train with custom parameters
-    python 06_train_detector.py --data ./dataset --epochs 100 --batch 16
+    python train_detector.py --data ./dataset --epochs 100 --batch 16
 
     # Resume training
-    python 06_train_detector.py --resume ./runs/train/exp/weights/last.pt
+    python train_detector.py --resume ./runs/train/exp/weights/last.pt
 """
 
 import argparse
@@ -351,7 +351,7 @@ All coordinates are normalized (0-1).
 ## Training
 
 ```bash
-python 06_train_detector.py --data ./dataset --epochs 100
+python train_detector.py --data ./dataset --epochs 100
 ```
 """)
 

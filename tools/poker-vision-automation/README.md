@@ -81,26 +81,80 @@ adb connect 127.0.0.1:5555
 ### 2. Capture Screen
 
 ```bash
-python 01_screen_capture.py
+python screen_capture.py
 ```
 
 ### 3. Detect Cards
 
 ```bash
-python 02_card_detection.py
+python card_detection.py
 ```
 
 ### 4. Run Full Automation
 
 ```bash
-python 05_full_automation.py
+python automation.py
 ```
+
+## Configuration and Calibration
+
+### Button Position Calibration
+
+Before running the automation, you need to calibrate button positions for your specific poker app:
+
+```bash
+# 1. Capture a screenshot of your poker app showing all buttons
+python screen_capture.py
+
+# 2. Run calibration tool
+python calibration.py --screenshot output/screenshot.png
+
+# 3. Click the center of each button when prompted
+# This creates button_config.json with your button positions
+```
+
+The calibration tool supports:
+- Interactive button position setup
+- Verification mode to check existing calibration
+- Multiple button types (fold, call, raise, bet, all-in)
+
+### Card Region Configuration
+
+Customize card detection regions for your poker app layout:
+
+```bash
+# Visualize default regions on a screenshot
+python card_region_classifier.py --screenshot screenshot.png --output regions.png
+
+# Use custom region config (edit region_config.json first)
+python automation.py --config my_config.json
+```
+
+### Configuration Files
+
+Create a configuration file for persistent settings:
+
+```bash
+# Generate example configuration
+python config.py --create-example
+
+# Edit example_config.yaml with your preferences
+# Then use it with automation:
+python automation.py --config example_config.yaml
+```
+
+Example configuration options:
+- Detection method (YOLO vs template matching)
+- OCR preprocessing settings
+- Poker strategy style (aggressive, balanced, conservative)
+- Logging levels and output directories
+- Screen resolution and device settings
 
 ## Implementation Details
 
 ### 1. Screen Capture from Android VM
 
-The `01_screen_capture.py` script captures screenshots from the Android emulator using ADB:
+The `screen_capture.py` script captures screenshots from the Android emulator using ADB:
 
 ```python
 # Capture screenshot and save to device
@@ -130,11 +184,11 @@ We support two approaches for card detection:
 - **Cons**: Less robust to variations in card appearance
 - **Use Case**: Quick prototypes and testing
 
-The `02_card_detection.py` script demonstrates both approaches.
+The `card_detection.py` script demonstrates both approaches.
 
 ### 3. Card Recognition with OCR
 
-The `03_ocr_card_recognition.py` script uses Tesseract OCR to:
+The `ocr_recognition.py` script uses Tesseract OCR to:
 - Extract rank (A, 2-10, J, Q, K)
 - Identify suit (♠, ♥, ♦, ♣)
 - Handle rotated or skewed cards
@@ -147,7 +201,7 @@ The `03_ocr_card_recognition.py` script uses Tesseract OCR to:
 
 ### 4. Poker Decision Logic
 
-The `04_poker_logic.py` implements basic poker strategy:
+The `poker_logic.py` implements basic poker strategy:
 - Hand evaluation (straight, flush, full house, etc.)
 - Pot odds calculation
 - Position-based decisions
@@ -160,7 +214,7 @@ The `04_poker_logic.py` implements basic poker strategy:
 
 ### 5. Android Automation via ADB
 
-The `05_full_automation.py` orchestrates the entire system:
+The `automation.py` orchestrates the entire system:
 
 ```python
 # Simulate touch events
@@ -184,10 +238,10 @@ adb shell input text "bet_amount"
 
 1. **Collect Screenshots**: Capture 500-1000 screenshots from your poker app
 2. **Annotate Images**: Use tools like LabelImg or Roboflow
-3. **Train YOLO Model**: Use `06_train_detector.py`
+3. **Train YOLO Model**: Use `train_detector.py`
 
 ```bash
-python 06_train_detector.py --data ./dataset --epochs 100
+python train_detector.py --data ./dataset --epochs 100
 ```
 
 ### Annotation Tools
@@ -201,12 +255,16 @@ python 06_train_detector.py --data ./dataset --epochs 100
 poker-vision-automation/
 ├── README.md                      # This file
 ├── requirements.txt               # Python dependencies
-├── 01_screen_capture.py          # ADB screen capture
-├── 02_card_detection.py          # Computer vision card detection
-├── 03_ocr_card_recognition.py    # OCR for card values
-├── 04_poker_logic.py             # Decision-making logic
-├── 05_full_automation.py         # Complete automation system
-├── 06_train_detector.py          # Training script for custom detector
+├── screen_capture.py              # ADB screen capture
+├── card_detection.py              # Computer vision card detection
+├── ocr_recognition.py             # OCR for card values
+├── poker_logic.py                 # Decision-making logic
+├── automation.py                  # Complete automation system
+├── train_detector.py              # Training script for custom detector
+├── calibration.py                 # Button position calibration tool
+├── card_region_classifier.py      # Card region classification
+├── config.py                      # Configuration management
+├── logging_setup.py               # Logging utilities
 ├── utils/
 │   ├── adb_helper.py             # ADB utilities
 │   ├── cv_utils.py               # Computer vision helpers
@@ -216,6 +274,7 @@ poker-vision-automation/
 │   ├── yolov5s.pt                # Pre-trained YOLO model (optional)
 │   └── card_detector.pt          # Custom trained model
 ├── templates/                     # Card templates for OpenCV matching
+├── logs/                          # Logging output
 └── output/                        # Screenshots and results
 ```
 
@@ -225,20 +284,20 @@ poker-vision-automation/
 
 ```bash
 # Test card detection on sample images
-python 02_card_detection.py --input ./test_images/ --output ./results/
+python card_detection.py --input ./test_images/ --output ./results/
 
 # Test OCR extraction
-python 03_ocr_card_recognition.py --image ./test_images/hand.png
+python ocr_recognition.py --image ./test_images/hand.png
 ```
 
 ### Live Automation
 
 ```bash
 # Run automation with debug mode
-python 05_full_automation.py --debug --slow-mode
+python automation.py --debug --slow-mode
 
 # Run with specific strategy
-python 05_full_automation.py --strategy conservative
+python automation.py --strategy conservative
 ```
 
 ## Useful Resources

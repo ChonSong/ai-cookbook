@@ -11,13 +11,13 @@ Requirements:
 
 Usage:
     # Recognize cards from image
-    python 03_ocr_card_recognition.py --image screenshot.png
+    python ocr_recognition.py --image screenshot.png
 
     # Process detected card regions
-    python 03_ocr_card_recognition.py --image screenshot.png --detections detections.json
+    python ocr_recognition.py --image screenshot.png --detections detections.json
 
     # Process with specific preprocessing
-    python 03_ocr_card_recognition.py --image screenshot.png --preprocess enhanced
+    python ocr_recognition.py --image screenshot.png --preprocess enhanced
 """
 
 import cv2
@@ -378,7 +378,7 @@ def main():
     parser.add_argument(
         "--detections",
         "-d",
-        help="JSON file with card detections (from 02_card_detection.py)"
+        help="JSON file with card detections (from card_detection.py)"
     )
     parser.add_argument(
         "--output",

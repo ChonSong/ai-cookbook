@@ -13,13 +13,13 @@ platforms typically violates terms of service and may be illegal.
 
 Usage:
     # Dry run (no actions executed)
-    python 05_full_automation.py --dry-run
+    python automation.py --dry-run
 
     # Live automation with slow mode
-    python 05_full_automation.py --slow-mode --debug
+    python automation.py --slow-mode --debug
 
     # Specific device
-    python 05_full_automation.py --device 192.168.1.100:5555
+    python automation.py --device 192.168.1.100:5555
 """
 
 import time
@@ -36,7 +36,7 @@ import subprocess
 class PokerAutomationSystem:
     """Complete poker automation system."""
 
-    def __init__(self, device_id=None, debug=False, slow_mode=False):
+    def __init__(self, device_id=None, debug=False, slow_mode=False, config_file='button_config.json'):
         """
         Initialize automation system.
 
@@ -44,6 +44,7 @@ class PokerAutomationSystem:
             device_id (str): Android device ID
             debug (bool): Enable debug output
             slow_mode (bool): Add delays between actions
+            config_file (str): Path to button position config file
         """
         self.device_id = device_id
         self.debug = debug
@@ -53,41 +54,50 @@ class PokerAutomationSystem:
         print("Initializing Poker Automation System...")
 
         # Screen capture
-        from importlib import import_module
         try:
-            screen_capture_module = import_module('01_screen_capture')
-            self.screen_capture = screen_capture_module.AndroidScreenCapture(device_id)
+            from screen_capture import AndroidScreenCapture
+            self.screen_capture = AndroidScreenCapture(device_id)
             print("✓ Screen capture initialized")
-        except:
-            print("⚠ Screen capture module not available")
+        except ImportError as e:
+            print(f"⚠ Screen capture module not available: {e}")
             self.screen_capture = None
 
         # Card detection
         try:
-            card_detection_module = import_module('02_card_detection')
-            self.card_detector = card_detection_module.CardDetectorTemplate()
+            from card_detection import CardDetectorTemplate
+            self.card_detector = CardDetectorTemplate()
             print("✓ Card detector initialized")
-        except:
-            print("⚠ Card detection module not available")
+        except ImportError as e:
+            print(f"⚠ Card detection module not available: {e}")
             self.card_detector = None
 
         # OCR recognition
         try:
-            ocr_module = import_module('03_ocr_card_recognition')
-            self.ocr_recognizer = ocr_module.CardOCRRecognizer()
+            from ocr_recognition import CardOCRRecognizer
+            self.ocr_recognizer = CardOCRRecognizer()
             print("✓ OCR recognizer initialized")
-        except:
-            print("⚠ OCR module not available")
+        except ImportError as e:
+            print(f"⚠ OCR module not available: {e}")
             self.ocr_recognizer = None
 
         # Poker strategy
         try:
-            poker_logic_module = import_module('04_poker_logic')
-            self.strategy = poker_logic_module.PokerStrategy()
+            from poker_logic import PokerStrategy
+            self.strategy = PokerStrategy()
             print("✓ Poker strategy initialized")
-        except:
-            print("⚠ Poker logic module not available")
+        except ImportError as e:
+            print(f"⚠ Poker logic module not available: {e}")
             self.strategy = None
+        
+        # Card region classifier
+        try:
+            from card_region_classifier import CardRegionClassifier
+            # Default resolution - will be updated when first screenshot is captured
+            self.region_classifier = CardRegionClassifier(screen_resolution=(1920, 1080))
+            print("✓ Card region classifier initialized")
+        except ImportError as e:
+            print(f"⚠ Card region classifier not available: {e}")
+            self.region_classifier = None
 
         # Game state
         self.game_state = {
@@ -99,8 +109,42 @@ class PokerAutomationSystem:
             'position': 'middle'
         }
 
-        # Button positions (these would need to be calibrated for specific app)
-        self.button_positions = {
+        # Load button positions from config file
+        self.button_positions = self._load_button_config(config_file)
+
+    def _load_button_config(self, config_file):
+        """
+        Load button positions from JSON config file.
+        
+        Args:
+            config_file (str): Path to button config file
+            
+        Returns:
+            dict: Button positions {button_name: (x, y)}
+        """
+        config_path = Path(config_file)
+        
+        if config_path.exists():
+            try:
+                with open(config_path) as f:
+                    config = json.load(f)
+                # Convert lists to tuples for consistency
+                positions = {k: tuple(v) if isinstance(v, list) else v 
+                           for k, v in config.items()}
+                print(f"✓ Loaded button positions from {config_file}")
+                if self.debug:
+                    for button, pos in positions.items():
+                        print(f"  {button}: {pos}")
+                return positions
+            except Exception as e:
+                print(f"⚠ Failed to load button config: {e}")
+        else:
+            print(f"⚠ Button config not found: {config_file}")
+            print("  Please run calibration.py first to calibrate button positions")
+            print("  Using default positions (may not work correctly)")
+        
+        # Default fallback positions
+        return {
             'fold': (540, 1500),
             'check': (540, 1400),
             'call': (540, 1400),
@@ -172,25 +216,48 @@ class PokerAutomationSystem:
             recognized_cards (list): List of recognized cards
             image (np.ndarray): Screenshot image
         """
-        # This is simplified - real implementation would need:
-        # 1. Region-based card classification (hole cards vs community cards vs opponent cards)
-        # 2. OCR for pot size, bet amounts, stack sizes
-        # 3. Button detection and state recognition
-
-        # For demonstration, we'll use heuristics based on card positions
+        # Update region classifier resolution if needed
+        if self.region_classifier:
+            image_height, image_width = image.shape[:2]
+            if (image_height, image_width) != (self.region_classifier.height, self.region_classifier.width):
+                self.region_classifier.height = image_height
+                self.region_classifier.width = image_width
+                if self.debug:
+                    print(f"  Updated region classifier resolution: {image_width}x{image_height}")
+        
         hole_cards = []
         community_cards = []
-
-        for card in recognized_cards:
-            if card['rank'] and card['suit']:
-                # Simple heuristic: bottom cards are hole cards, center are community
-                y_center = (card['bbox'][1] + card['bbox'][3]) / 2
-                image_height = image.shape[0]
-
-                if y_center > image_height * 0.7:
+        
+        if self.region_classifier:
+            # Use region classifier for better card classification
+            classified = self.region_classifier.classify_cards(recognized_cards)
+            
+            if self.debug:
+                print(f"  Classified: {len(classified['hole_cards'])} hole, "
+                      f"{len(classified['community'])} community, "
+                      f"{len(classified['opponent'])} opponent")
+            
+            # Extract card strings from hole cards
+            for card in classified['hole_cards']:
+                if card['rank'] and card['suit']:
                     hole_cards.append(card['card'])
-                elif image_height * 0.3 < y_center < image_height * 0.6:
+            
+            # Extract card strings from community cards
+            for card in classified['community']:
+                if card['rank'] and card['suit']:
                     community_cards.append(card['card'])
+        else:
+            # Fallback to simple heuristic if classifier not available
+            for card in recognized_cards:
+                if card['rank'] and card['suit']:
+                    # Simple heuristic: bottom cards are hole cards, center are community
+                    y_center = (card['bbox'][1] + card['bbox'][3]) / 2
+                    image_height = image.shape[0]
+
+                    if y_center > image_height * 0.7:
+                        hole_cards.append(card['card'])
+                    elif image_height * 0.3 < y_center < image_height * 0.6:
+                        community_cards.append(card['card'])
 
         self.game_state['hole_cards'] = hole_cards[:2]  # Max 2 hole cards
         self.game_state['community_cards'] = community_cards[:5]  # Max 5 community
@@ -442,6 +509,12 @@ def main():
         type=int,
         help="Maximum number of hands to play"
     )
+    parser.add_argument(
+        "--config",
+        "-c",
+        default="button_config.json",
+        help="Path to button position config file (default: button_config.json)"
+    )
 
     args = parser.parse_args()
 
@@ -467,7 +540,8 @@ def main():
     automation = PokerAutomationSystem(
         device_id=args.device,
         debug=args.debug,
-        slow_mode=args.slow_mode
+        slow_mode=args.slow_mode,
+        config_file=args.config
     )
 
     # Run automation
