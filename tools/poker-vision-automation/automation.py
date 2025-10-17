@@ -36,7 +36,7 @@ import subprocess
 class PokerAutomationSystem:
     """Complete poker automation system."""
 
-    def __init__(self, device_id=None, debug=False, slow_mode=False):
+    def __init__(self, device_id=None, debug=False, slow_mode=False, config_file='button_config.json'):
         """
         Initialize automation system.
 
@@ -44,6 +44,7 @@ class PokerAutomationSystem:
             device_id (str): Android device ID
             debug (bool): Enable debug output
             slow_mode (bool): Add delays between actions
+            config_file (str): Path to button position config file
         """
         self.device_id = device_id
         self.debug = debug
@@ -98,8 +99,42 @@ class PokerAutomationSystem:
             'position': 'middle'
         }
 
-        # Button positions (these would need to be calibrated for specific app)
-        self.button_positions = {
+        # Load button positions from config file
+        self.button_positions = self._load_button_config(config_file)
+
+    def _load_button_config(self, config_file):
+        """
+        Load button positions from JSON config file.
+        
+        Args:
+            config_file (str): Path to button config file
+            
+        Returns:
+            dict: Button positions {button_name: (x, y)}
+        """
+        config_path = Path(config_file)
+        
+        if config_path.exists():
+            try:
+                with open(config_path) as f:
+                    config = json.load(f)
+                # Convert lists to tuples for consistency
+                positions = {k: tuple(v) if isinstance(v, list) else v 
+                           for k, v in config.items()}
+                print(f"✓ Loaded button positions from {config_file}")
+                if self.debug:
+                    for button, pos in positions.items():
+                        print(f"  {button}: {pos}")
+                return positions
+            except Exception as e:
+                print(f"⚠ Failed to load button config: {e}")
+        else:
+            print(f"⚠ Button config not found: {config_file}")
+            print("  Please run calibration.py first to calibrate button positions")
+            print("  Using default positions (may not work correctly)")
+        
+        # Default fallback positions
+        return {
             'fold': (540, 1500),
             'check': (540, 1400),
             'call': (540, 1400),
@@ -441,6 +476,12 @@ def main():
         type=int,
         help="Maximum number of hands to play"
     )
+    parser.add_argument(
+        "--config",
+        "-c",
+        default="button_config.json",
+        help="Path to button position config file (default: button_config.json)"
+    )
 
     args = parser.parse_args()
 
@@ -466,7 +507,8 @@ def main():
     automation = PokerAutomationSystem(
         device_id=args.device,
         debug=args.debug,
-        slow_mode=args.slow_mode
+        slow_mode=args.slow_mode,
+        config_file=args.config
     )
 
     # Run automation
