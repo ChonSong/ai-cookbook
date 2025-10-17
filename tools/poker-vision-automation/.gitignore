@@ -1,0 +1,41 @@
+# Output directories
+output/
+detected/
+screenshots/
+captures/
+temp/
+logs/
+batch_results/
+game_session/
+monitoring/
+
+# Training artifacts
+runs/
+weights/
+*.pt
+*.pth
+*.onnx
+*.engine
+
+# Dataset (too large for git)
+dataset/
+my_card_dataset/
+*/raw_images/
+
+# Templates (specific to each user's poker app)
+templates/*.png
+templates/*.jpg
+
+# Models
+models/*.pt
+models/*.pth
+
+# Temporary files
+*.pyc
+__pycache__/
+.pytest_cache/
+*.log
+
+# Decision logs
+decision.json
+hand_*.json
