@@ -1,0 +1,33 @@
+# Computer Vision
+opencv-python>=4.8.0
+opencv-contrib-python>=4.8.0
+
+# OCR
+pytesseract>=0.3.10
+
+# Deep Learning for Card Detection
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.0.0  # YOLOv8
+# Note: For YOLOv5, clone from https://github.com/ultralytics/yolov5
+
+# Image Processing
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# Android Automation
+pure-python-adb>=0.3.0  # Python ADB implementation (optional)
+
+# Poker Logic and Utilities
+treys>=0.1.8  # Fast poker hand evaluator
+pokerkit>=0.5.0  # Poker game engine (optional)
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0
+tqdm>=4.65.0
+
+# Development and Testing
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
