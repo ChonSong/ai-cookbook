@@ -12,13 +12,13 @@ Requirements:
 
 Usage:
     # Using YOLO
-    python 02_card_detection.py --input image.png --method yolo
+    python card_detection.py --input image.png --method yolo
 
     # Using Template Matching
-    python 02_card_detection.py --input image.png --method template
+    python card_detection.py --input image.png --method template
 
     # Process entire directory
-    python 02_card_detection.py --input ./screenshots/ --output ./detected/
+    python card_detection.py --input ./screenshots/ --output ./detected/
 """
 
 import cv2

@@ -51,20 +51,20 @@ adb shell echo "Connected!"
 **Step 1: Capture a single screenshot**
 
 ```bash
-python 01_screen_capture.py --output ./screenshots/
+python screen_capture.py --output ./screenshots/
 ```
 
 **Step 2: Detect cards in the screenshot**
 
 ```bash
 # Using template matching (no training required)
-python 02_card_detection.py \
+python card_detection.py \
   --input ./screenshots/screenshot_*.png \
   --method template \
   --visualize
 
 # Using YOLO (requires trained model)
-python 02_card_detection.py \
+python card_detection.py \
   --input ./screenshots/screenshot_*.png \
   --method yolo \
   --model ./models/card_detector.pt \
@@ -74,7 +74,7 @@ python 02_card_detection.py \
 **Step 3: Recognize card values**
 
 ```bash
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image ./screenshots/screenshot_*.png \
   --detections ./detected/screenshot_*_detections.json \
   --visualize
@@ -88,7 +88,7 @@ python 03_ocr_card_recognition.py \
 
 ```bash
 # Strong hand
-python 04_poker_logic.py \
+python poker_logic.py \
   --hand "A♠ K♠" \
   --board "Q♠ J♠ 10♠"
 
@@ -99,7 +99,7 @@ python 04_poker_logic.py \
 
 ```bash
 # Pre-flop decision
-python 04_poker_logic.py \
+python poker_logic.py \
   --hand "7♥ 2♦" \
   --pot 100 \
   --bet 50 \
@@ -114,7 +114,7 @@ python 04_poker_logic.py \
 
 ```bash
 # Same hand, different positions
-python 04_poker_logic.py \
+python poker_logic.py \
   --hand "9♠ 9♥" \
   --pot 50 \
   --bet 10 \
@@ -129,7 +129,7 @@ python 04_poker_logic.py \
 **Test full automation without executing actions**
 
 ```bash
-python 05_full_automation.py \
+python automation.py \
   --dry-run \
   --debug \
   --single-hand
@@ -149,14 +149,14 @@ python 05_full_automation.py \
 
 ```bash
 # Capture every 2 seconds for 60 seconds
-python 01_screen_capture.py \
+python screen_capture.py \
   --continuous \
   --interval 2 \
   --duration 60 \
   --output ./game_session/
 
 # Or capture a specific number
-python 01_screen_capture.py \
+python screen_capture.py \
   --continuous \
   --interval 1 \
   --max-captures 50 \
@@ -169,7 +169,7 @@ python 01_screen_capture.py \
 
 ```bash
 # Detect cards in all screenshots
-python 02_card_detection.py \
+python card_detection.py \
   --input ./game_session/ \
   --output ./batch_results/ \
   --method template \
@@ -178,7 +178,7 @@ python 02_card_detection.py \
 # Recognize all detected cards
 for detection in ./batch_results/*_detections.json; do
   image="${detection/_detections.json/.png}"
-  python 03_ocr_card_recognition.py \
+  python ocr_recognition.py \
     --image "$image" \
     --detections "$detection" \
     --visualize
@@ -194,12 +194,12 @@ done
 adb devices
 
 # Use specific device
-python 01_screen_capture.py \
+python screen_capture.py \
   --device emulator-5554 \
   --output ./captures/
 
 # Connect to network device
-python 01_screen_capture.py \
+python screen_capture.py \
   --connect 192.168.1.100 \
   --device 192.168.1.100:5555
 ```
@@ -211,7 +211,7 @@ python 01_screen_capture.py \
 **Step 1: Create dataset structure**
 
 ```bash
-python 06_train_detector.py \
+python train_detector.py \
   --create-dataset ./my_card_dataset
 ```
 
@@ -219,7 +219,7 @@ python 06_train_detector.py \
 
 ```bash
 # Capture training images
-python 01_screen_capture.py \
+python screen_capture.py \
   --continuous \
   --interval 3 \
   --max-captures 500 \
@@ -237,13 +237,13 @@ python 01_screen_capture.py \
 
 ```bash
 # Train with default settings
-python 06_train_detector.py \
+python train_detector.py \
   --data ./my_card_dataset \
   --epochs 100 \
   --batch 16
 
 # Train with GPU and larger batch size
-python 06_train_detector.py \
+python train_detector.py \
   --data ./my_card_dataset \
   --model yolov8n \
   --epochs 200 \
@@ -251,7 +251,7 @@ python 06_train_detector.py \
   --device cuda
 
 # Resume training from checkpoint
-python 06_train_detector.py \
+python train_detector.py \
   --data ./my_card_dataset \
   --resume ./runs/train/exp/weights/last.pt
 ```
@@ -259,7 +259,7 @@ python 06_train_detector.py \
 **Step 4: Evaluate the trained model**
 
 ```bash
-python 06_train_detector.py \
+python train_detector.py \
   --data ./my_card_dataset \
   --evaluate ./runs/train/exp/weights/best.pt
 ```
@@ -267,7 +267,7 @@ python 06_train_detector.py \
 **Step 5: Use trained model for detection**
 
 ```bash
-python 02_card_detection.py \
+python card_detection.py \
   --input ./test_images/ \
   --method yolo \
   --model ./runs/train/exp/weights/best.pt \
@@ -296,7 +296,7 @@ adb connect 127.0.0.1:62025 # NoxPlayer
 **Solution 1: Adjust confidence threshold**
 
 ```bash
-python 02_card_detection.py \
+python card_detection.py \
   --input ./test.png \
   --method template \
   --confidence 0.6  # Lower threshold for more detections
@@ -310,7 +310,7 @@ python 02_card_detection.py \
 # ace_spades.png, king_hearts.png, etc.
 
 # Then run detection
-python 02_card_detection.py \
+python card_detection.py \
   --input ./test.png \
   --templates ./templates/ \
   --method template
@@ -322,17 +322,17 @@ python 02_card_detection.py \
 
 ```bash
 # Standard preprocessing
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image ./test.png \
   --preprocess standard
 
 # Enhanced preprocessing (more aggressive)
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image ./test.png \
   --preprocess enhanced
 
 # Adaptive thresholding
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image ./test.png \
   --preprocess adaptive
 ```
@@ -343,17 +343,17 @@ python 03_ocr_card_recognition.py \
 
 ```bash
 # Use lower resolution
-python 01_screen_capture.py \
+python screen_capture.py \
   --output ./captures/ \
   # Then resize images before processing
 
 # Use YOLO instead of template matching
-python 02_card_detection.py \
+python card_detection.py \
   --method yolo \
   --model yolov5s.pt  # Smallest/fastest YOLO model
 
 # Process on GPU
-python 06_train_detector.py \
+python train_detector.py \
   --device cuda
 ```
 
@@ -366,11 +366,11 @@ python 06_train_detector.py \
 # analyze_hand.sh - Complete pipeline for analyzing a poker hand
 
 # Capture screenshot
-python 01_screen_capture.py --output ./temp/
+python screen_capture.py --output ./temp/
 SCREENSHOT=$(ls -t ./temp/screenshot_*.png | head -1)
 
 # Detect cards
-python 02_card_detection.py \
+python card_detection.py \
   --input "$SCREENSHOT" \
   --output ./temp/ \
   --method template \
@@ -378,7 +378,7 @@ python 02_card_detection.py \
 
 # Recognize cards
 DETECTIONS=$(ls -t ./temp/*_detections.json | head -1)
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image "$SCREENSHOT" \
   --detections "$DETECTIONS" \
   --output ./temp/ \
@@ -407,7 +407,7 @@ def monitor_game(duration=3600):
     while time.time() - start < duration:
         # Capture screenshot
         subprocess.run([
-            'python', '01_screen_capture.py',
+            'python', 'screen_capture.py',
             '--output', './monitoring/'
         ])
         

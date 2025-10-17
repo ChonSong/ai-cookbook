@@ -49,7 +49,7 @@ You should see your device listed.
 ### Step 2: Capture a Screenshot
 
 ```bash
-python 01_screen_capture.py
+python screen_capture.py
 ```
 
 ✅ **Expected output**: Screenshot saved to `./output/screenshot_*.png`
@@ -57,7 +57,7 @@ python 01_screen_capture.py
 ### Step 3: Test Card Detection
 
 ```bash
-python 02_card_detection.py \
+python card_detection.py \
   --input ./output/screenshot_*.png \
   --method template \
   --visualize
@@ -68,7 +68,7 @@ python 02_card_detection.py \
 ### Step 4: Test OCR Recognition
 
 ```bash
-python 03_ocr_card_recognition.py \
+python ocr_recognition.py \
   --image ./output/screenshot_*.png \
   --visualize
 ```
@@ -78,7 +78,7 @@ python 03_ocr_card_recognition.py \
 ### Step 5: Test Poker Logic
 
 ```bash
-python 04_poker_logic.py \
+python poker_logic.py \
   --hand "A♠ K♠" \
   --board "Q♠ J♠ 10♠"
 ```
@@ -88,7 +88,7 @@ python 04_poker_logic.py \
 ### Step 6: Test Full Automation (Dry Run)
 
 ```bash
-python 05_full_automation.py \
+python automation.py \
   --dry-run \
   --debug \
   --single-hand
@@ -160,8 +160,8 @@ tesseract --version
 
 1. Collect 200-500 screenshots from your poker app
 2. Annotate cards using [LabelImg](https://github.com/heartexlabs/labelImg)
-3. Train model: `python 06_train_detector.py --data ./dataset --epochs 100`
-4. Use trained model: `python 02_card_detection.py --method yolo --model ./runs/train/exp/weights/best.pt`
+3. Train model: `python train_detector.py --data ./dataset --epochs 100`
+4. Use trained model: `python card_detection.py --method yolo --model ./runs/train/exp/weights/best.pt`
 
 ## Safety Reminder
 
@@ -202,11 +202,11 @@ pip install opencv-python pytesseract numpy
 adb connect 127.0.0.1:5555
 
 # 3. Capture and view
-python 01_screen_capture.py
+python screen_capture.py
 # Check ./output/ for screenshot
 
 # 4. Test poker logic (no dependencies on actual game)
-python 04_poker_logic.py --hand "A♠ A♥" --board "A♦ K♠ Q♠"
+python poker_logic.py --hand "A♠ A♥" --board "A♦ K♠ Q♠"
 ```
 
 ## Support

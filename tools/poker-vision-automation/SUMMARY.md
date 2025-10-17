@@ -8,27 +8,27 @@ This directory contains a **complete, production-ready poker vision automation s
 
 ### 📁 Main Components (6 Python Scripts)
 
-1. **01_screen_capture.py** (308 lines)
+1. **screen_capture.py** (308 lines)
    - Captures screenshots from Android devices via ADB
    - Supports continuous capture with configurable intervals
    - Network device connection support
    - Real-time screen resolution detection
 
-2. **02_card_detection.py** (441 lines)
+2. **card_detection.py** (441 lines)
    - Two detection methods: YOLO (deep learning) and Template Matching (traditional CV)
    - Multi-scale template matching for robust detection
    - Non-maximum suppression to remove duplicates
    - Batch processing support
    - Visualization with bounding boxes
 
-3. **03_ocr_card_recognition.py** (461 lines)
+3. **ocr_recognition.py** (461 lines)
    - Tesseract OCR-based card recognition
    - Three preprocessing methods: standard, enhanced, adaptive
    - Rank and suit parsing with error handling
    - Corner region extraction for improved accuracy
    - Confidence scoring
 
-4. **04_poker_logic.py** (458 lines)
+4. **poker_logic.py** (458 lines)
    - Complete poker hand evaluation system
    - Pot odds calculation
    - Position-based strategy (early, middle, late, button)
@@ -36,7 +36,7 @@ This directory contains a **complete, production-ready poker vision automation s
    - Decision recommendation with reasoning
    - Support for treys library (fast hand evaluation)
 
-5. **05_full_automation.py** (484 lines)
+5. **automation.py** (484 lines)
    - Integrates all components into unified system
    - Continuous automation with hand tracking
    - ADB-based action execution (tap, swipe, text input)
@@ -44,7 +44,7 @@ This directory contains a **complete, production-ready poker vision automation s
    - Dry-run mode for safe testing
    - Game state tracking
 
-6. **06_train_detector.py** (453 lines)
+6. **train_detector.py** (453 lines)
    - YOLO model training pipeline
    - Dataset preparation and validation
    - Support for YOLOv5 and YOLOv8
@@ -172,12 +172,12 @@ Input (Android VM) → Screen Capture (ADB) → Card Detection (YOLO/OpenCV)
 
 ```
 poker-vision-automation/
-├── 01_screen_capture.py        # ADB screen capture
-├── 02_card_detection.py        # Computer vision detection
-├── 03_ocr_card_recognition.py  # OCR card reading
-├── 04_poker_logic.py           # Decision-making AI
-├── 05_full_automation.py       # Complete integration
-├── 06_train_detector.py        # Model training
+├── screen_capture.py        # ADB screen capture
+├── card_detection.py        # Computer vision detection
+├── ocr_recognition.py  # OCR card reading
+├── poker_logic.py           # Decision-making AI
+├── automation.py       # Complete integration
+├── train_detector.py        # Model training
 ├── README.md                   # Main documentation
 ├── EXAMPLES.md                 # Usage examples
 ├── QUICKSTART.md               # Getting started

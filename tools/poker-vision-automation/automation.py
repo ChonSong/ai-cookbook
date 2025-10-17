@@ -13,13 +13,13 @@ platforms typically violates terms of service and may be illegal.
 
 Usage:
     # Dry run (no actions executed)
-    python 05_full_automation.py --dry-run
+    python automation.py --dry-run
 
     # Live automation with slow mode
-    python 05_full_automation.py --slow-mode --debug
+    python automation.py --slow-mode --debug
 
     # Specific device
-    python 05_full_automation.py --device 192.168.1.100:5555
+    python automation.py --device 192.168.1.100:5555
 """
 
 import time
@@ -53,40 +53,39 @@ class PokerAutomationSystem:
         print("Initializing Poker Automation System...")
 
         # Screen capture
-        from importlib import import_module
         try:
-            screen_capture_module = import_module('01_screen_capture')
-            self.screen_capture = screen_capture_module.AndroidScreenCapture(device_id)
+            from screen_capture import AndroidScreenCapture
+            self.screen_capture = AndroidScreenCapture(device_id)
             print("✓ Screen capture initialized")
-        except:
-            print("⚠ Screen capture module not available")
+        except ImportError as e:
+            print(f"⚠ Screen capture module not available: {e}")
             self.screen_capture = None
 
         # Card detection
         try:
-            card_detection_module = import_module('02_card_detection')
-            self.card_detector = card_detection_module.CardDetectorTemplate()
+            from card_detection import CardDetectorTemplate
+            self.card_detector = CardDetectorTemplate()
             print("✓ Card detector initialized")
-        except:
-            print("⚠ Card detection module not available")
+        except ImportError as e:
+            print(f"⚠ Card detection module not available: {e}")
             self.card_detector = None
 
         # OCR recognition
         try:
-            ocr_module = import_module('03_ocr_card_recognition')
-            self.ocr_recognizer = ocr_module.CardOCRRecognizer()
+            from ocr_recognition import CardOCRRecognizer
+            self.ocr_recognizer = CardOCRRecognizer()
             print("✓ OCR recognizer initialized")
-        except:
-            print("⚠ OCR module not available")
+        except ImportError as e:
+            print(f"⚠ OCR module not available: {e}")
             self.ocr_recognizer = None
 
         # Poker strategy
         try:
-            poker_logic_module = import_module('04_poker_logic')
-            self.strategy = poker_logic_module.PokerStrategy()
+            from poker_logic import PokerStrategy
+            self.strategy = PokerStrategy()
             print("✓ Poker strategy initialized")
-        except:
-            print("⚠ Poker logic module not available")
+        except ImportError as e:
+            print(f"⚠ Poker logic module not available: {e}")
             self.strategy = None
 
         # Game state

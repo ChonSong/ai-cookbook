@@ -11,8 +11,8 @@ Requirements:
     - Device connected via USB or network
 
 Usage:
-    python 01_screen_capture.py
-    python 01_screen_capture.py --device 192.168.1.100:5555 --output ./captures/
+    python screen_capture.py
+    python screen_capture.py --device 192.168.1.100:5555 --output ./captures/
 """
 
 import os
