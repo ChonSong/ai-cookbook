@@ -8,6 +8,7 @@ logs/
 batch_results/
 game_session/
 monitoring/
+test_logs/
 
 # Training artifacts
 runs/
@@ -39,3 +40,12 @@ __pycache__/
 # Decision logs
 decision.json
 hand_*.json
+
+# User-specific configuration files
+button_config.json
+region_config.json
+config.yaml
+config.yml
+config.json
+my_*.yaml
+my_*.json
