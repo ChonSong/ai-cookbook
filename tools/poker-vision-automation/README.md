@@ -96,6 +96,60 @@ python card_detection.py
 python automation.py
 ```
 
+## Configuration and Calibration
+
+### Button Position Calibration
+
+Before running the automation, you need to calibrate button positions for your specific poker app:
+
+```bash
+# 1. Capture a screenshot of your poker app showing all buttons
+python screen_capture.py
+
+# 2. Run calibration tool
+python calibration.py --screenshot output/screenshot.png
+
+# 3. Click the center of each button when prompted
+# This creates button_config.json with your button positions
+```
+
+The calibration tool supports:
+- Interactive button position setup
+- Verification mode to check existing calibration
+- Multiple button types (fold, call, raise, bet, all-in)
+
+### Card Region Configuration
+
+Customize card detection regions for your poker app layout:
+
+```bash
+# Visualize default regions on a screenshot
+python card_region_classifier.py --screenshot screenshot.png --output regions.png
+
+# Use custom region config (edit region_config.json first)
+python automation.py --config my_config.json
+```
+
+### Configuration Files
+
+Create a configuration file for persistent settings:
+
+```bash
+# Generate example configuration
+python config.py --create-example
+
+# Edit example_config.yaml with your preferences
+# Then use it with automation:
+python automation.py --config example_config.yaml
+```
+
+Example configuration options:
+- Detection method (YOLO vs template matching)
+- OCR preprocessing settings
+- Poker strategy style (aggressive, balanced, conservative)
+- Logging levels and output directories
+- Screen resolution and device settings
+
 ## Implementation Details
 
 ### 1. Screen Capture from Android VM
@@ -201,12 +255,16 @@ python train_detector.py --data ./dataset --epochs 100
 poker-vision-automation/
 ├── README.md                      # This file
 ├── requirements.txt               # Python dependencies
-├── screen_capture.py          # ADB screen capture
-├── card_detection.py          # Computer vision card detection
-├── ocr_recognition.py    # OCR for card values
-├── poker_logic.py             # Decision-making logic
-├── automation.py         # Complete automation system
-├── train_detector.py          # Training script for custom detector
+├── screen_capture.py              # ADB screen capture
+├── card_detection.py              # Computer vision card detection
+├── ocr_recognition.py             # OCR for card values
+├── poker_logic.py                 # Decision-making logic
+├── automation.py                  # Complete automation system
+├── train_detector.py              # Training script for custom detector
+├── calibration.py                 # Button position calibration tool
+├── card_region_classifier.py      # Card region classification
+├── config.py                      # Configuration management
+├── logging_setup.py               # Logging utilities
 ├── utils/
 │   ├── adb_helper.py             # ADB utilities
 │   ├── cv_utils.py               # Computer vision helpers
@@ -216,6 +274,7 @@ poker-vision-automation/
 │   ├── yolov5s.pt                # Pre-trained YOLO model (optional)
 │   └── card_detector.pt          # Custom trained model
 ├── templates/                     # Card templates for OpenCV matching
+├── logs/                          # Logging output
 └── output/                        # Screenshots and results
 ```
 

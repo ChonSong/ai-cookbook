@@ -85,7 +85,29 @@ python poker_logic.py \
 
 ✅ **Expected output**: Hand evaluation (Royal Flush)
 
-### Step 6: Test Full Automation (Dry Run)
+### Step 6: Calibrate Button Positions
+
+Before running automation, calibrate button positions for your poker app:
+
+```bash
+# 1. Capture a screenshot with all buttons visible
+python screen_capture.py
+
+# 2. Run calibration tool
+python calibration.py --screenshot output/screenshot_*.png
+
+# 3. Click the center of each button when prompted
+# - fold
+# - call/check
+# - raise/bet
+# - all_in (if visible)
+
+# This creates button_config.json
+```
+
+✅ **Expected output**: `button_config.json` created with button positions
+
+### Step 7: Test Full Automation (Dry Run)
 
 ```bash
 python automation.py \
@@ -97,6 +119,30 @@ python automation.py \
 ✅ **Expected output**: Complete analysis without executing actions
 
 ## Common Issues
+
+### ❌ "Button config not found"
+
+**Solution**: Run the calibration tool first
+
+```bash
+# Capture screenshot with all buttons visible
+python screen_capture.py
+
+# Run calibration
+python calibration.py --screenshot output/screenshot_*.png
+```
+
+### ❌ "Cards in wrong regions"
+
+**Solution**: Visualize and adjust region definitions
+
+```bash
+# Visualize default regions
+python card_region_classifier.py --screenshot screenshot.png --output regions.png
+
+# Check the visualization and adjust if needed
+# Edit region_config.json if regions don't match your app layout
+```
 
 ### ❌ "ADB not found"
 
@@ -148,6 +194,27 @@ tesseract --version
 3. **Train custom model**: For better accuracy, train a YOLO model with your app's cards
 
 ## Next Steps
+
+### Configuration Options
+
+Create a configuration file for persistent settings:
+
+```bash
+# Generate example config
+python config.py --create-example
+
+# Edit example_config.yaml with your preferences
+nano example_config.yaml
+
+# Use with automation
+python automation.py --config example_config.yaml --dry-run
+```
+
+Example configuration adjustments:
+- **Detection method**: Switch between YOLO and template matching
+- **Strategy style**: Choose aggressive, balanced, or conservative play
+- **Logging level**: Set DEBUG for detailed logs, INFO for normal operation
+- **Screen resolution**: Match your emulator's resolution
 
 ### For Template Matching
 

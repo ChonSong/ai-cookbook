@@ -1,0 +1,50 @@
+# Poker Automation System - Example Configuration
+# Copy this file and customize for your setup
+
+# Device settings
+device_id: null  # null = auto-detect, or specify like "192.168.1.100:5555"
+debug: true      # Enable detailed logging
+slow_mode: true  # Add delays between actions for safer testing
+capture_interval: 2.0  # Seconds between screen captures
+
+# Card detection settings
+detection:
+  method: template  # Options: 'yolo' or 'template'
+  confidence_threshold: 0.5  # Minimum confidence for detections (0-1)
+  model_path: yolov5s.pt  # Path to YOLO model (if using YOLO method)
+  template_dir: ./templates  # Directory with card templates (if using template method)
+  use_cache: true  # Cache detection results for performance
+
+# OCR settings
+ocr:
+  preprocess_method: enhanced  # Options: 'basic', 'enhanced', 'adaptive'
+  tesseract_config: '--psm 6 --oem 3'  # Tesseract configuration string
+  corner_size: 0.3  # Portion of card to OCR (0-1)
+  min_confidence: 50.0  # Minimum OCR confidence threshold
+
+# Poker strategy settings
+strategy:
+  style: balanced  # Options: 'aggressive', 'balanced', 'conservative'
+  position_aware: true  # Adjust strategy based on table position
+  min_hand_strength: 0.4  # Minimum hand strength to play (0-1)
+  bluff_frequency: 0.1  # How often to bluff (0-1)
+  pot_odds_threshold: 2.0  # Minimum pot odds to call
+
+# Screen region settings
+regions:
+  config_file: null  # Path to custom region config, or null for defaults
+  auto_calibrate: false  # Automatically calibrate regions (future feature)
+  screen_resolution: [1920, 1080]  # Screen resolution [width, height]
+
+# Button position settings
+buttons:
+  config_file: button_config.json  # Path to button calibration file
+  calibration_required: true  # Require calibration before running
+
+# Logging settings
+logging:
+  log_dir: ./logs  # Directory for log files
+  log_level: INFO  # Options: DEBUG, INFO, WARNING, ERROR
+  max_log_size: 10485760  # Maximum log file size in bytes (10MB)
+  backup_count: 5  # Number of backup log files to keep
+  console_output: true  # Also output logs to console
