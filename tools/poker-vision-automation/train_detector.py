@@ -351,7 +351,7 @@ All coordinates are normalized (0-1).
 ## Training
 
 ```bash
-python 06_train_detector.py --data ./dataset --epochs 100
+python train_detector.py --data ./dataset --epochs 100
 ```
 """)
 
