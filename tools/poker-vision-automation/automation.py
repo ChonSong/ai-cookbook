@@ -88,6 +88,16 @@ class PokerAutomationSystem:
         except ImportError as e:
             print(f"⚠ Poker logic module not available: {e}")
             self.strategy = None
+        
+        # Card region classifier
+        try:
+            from card_region_classifier import CardRegionClassifier
+            # Default resolution - will be updated when first screenshot is captured
+            self.region_classifier = CardRegionClassifier(screen_resolution=(1920, 1080))
+            print("✓ Card region classifier initialized")
+        except ImportError as e:
+            print(f"⚠ Card region classifier not available: {e}")
+            self.region_classifier = None
 
         # Game state
         self.game_state = {
@@ -206,25 +216,48 @@ class PokerAutomationSystem:
             recognized_cards (list): List of recognized cards
             image (np.ndarray): Screenshot image
         """
-        # This is simplified - real implementation would need:
-        # 1. Region-based card classification (hole cards vs community cards vs opponent cards)
-        # 2. OCR for pot size, bet amounts, stack sizes
-        # 3. Button detection and state recognition
-
-        # For demonstration, we'll use heuristics based on card positions
+        # Update region classifier resolution if needed
+        if self.region_classifier:
+            image_height, image_width = image.shape[:2]
+            if (image_height, image_width) != (self.region_classifier.height, self.region_classifier.width):
+                self.region_classifier.height = image_height
+                self.region_classifier.width = image_width
+                if self.debug:
+                    print(f"  Updated region classifier resolution: {image_width}x{image_height}")
+        
         hole_cards = []
         community_cards = []
-
-        for card in recognized_cards:
-            if card['rank'] and card['suit']:
-                # Simple heuristic: bottom cards are hole cards, center are community
-                y_center = (card['bbox'][1] + card['bbox'][3]) / 2
-                image_height = image.shape[0]
-
-                if y_center > image_height * 0.7:
+        
+        if self.region_classifier:
+            # Use region classifier for better card classification
+            classified = self.region_classifier.classify_cards(recognized_cards)
+            
+            if self.debug:
+                print(f"  Classified: {len(classified['hole_cards'])} hole, "
+                      f"{len(classified['community'])} community, "
+                      f"{len(classified['opponent'])} opponent")
+            
+            # Extract card strings from hole cards
+            for card in classified['hole_cards']:
+                if card['rank'] and card['suit']:
                     hole_cards.append(card['card'])
-                elif image_height * 0.3 < y_center < image_height * 0.6:
+            
+            # Extract card strings from community cards
+            for card in classified['community']:
+                if card['rank'] and card['suit']:
                     community_cards.append(card['card'])
+        else:
+            # Fallback to simple heuristic if classifier not available
+            for card in recognized_cards:
+                if card['rank'] and card['suit']:
+                    # Simple heuristic: bottom cards are hole cards, center are community
+                    y_center = (card['bbox'][1] + card['bbox'][3]) / 2
+                    image_height = image.shape[0]
+
+                    if y_center > image_height * 0.7:
+                        hole_cards.append(card['card'])
+                    elif image_height * 0.3 < y_center < image_height * 0.6:
+                        community_cards.append(card['card'])
 
         self.game_state['hole_cards'] = hole_cards[:2]  # Max 2 hole cards
         self.game_state['community_cards'] = community_cards[:5]  # Max 5 community
